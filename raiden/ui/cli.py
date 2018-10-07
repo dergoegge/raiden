@@ -338,8 +338,7 @@ def options(func):
 =======
 def run_app(
         address,
-        address_hex,
-        privatekey_bin,
+        keystore_path,
         gas_price,
         eth_rpc_endpoint,
         registry_contract_address,
@@ -352,6 +351,7 @@ def run_app(
         rpc,
         sync_check,
         console,
+        password_file,
         web_ui,
         datadir,
         transport,
@@ -373,6 +373,14 @@ def run_app(
 
     if transport == 'udp' and not mapped_socket:
         raise RuntimeError('Missing socket')
+
+    try:
+        address_hex = kwargs['address_hex']
+        privatekey_bin = kwargs['privatekey_bin']
+    except KeyError:
+        address_hex = to_normalized_address(address) if address else None
+        address_hex, privatekey_bin = prompt_account(address_hex, keystore_path, password_file)
+        address = to_canonical_address(address_hex)
 
     (listen_host, listen_port) = split_endpoint(listen_address)
     (api_host, api_port) = split_endpoint(api_address)
